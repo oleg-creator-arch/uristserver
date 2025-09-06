@@ -5,7 +5,7 @@ import {
   ManyToOne,
   CreateDateColumn,
 } from 'typeorm';
-import { User } from './user.entity';
+import { Order } from './order.entity';
 
 @Entity()
 export class Photo {
@@ -24,6 +24,6 @@ export class Photo {
   @CreateDateColumn()
   uploadedAt: Date;
 
-  @ManyToOne(() => User, (user) => user.photos, { onDelete: 'CASCADE' })
-  user: User;
+  @ManyToOne(() => Order, (order) => order.photos, { onDelete: 'CASCADE' })
+  order: Order;
 }

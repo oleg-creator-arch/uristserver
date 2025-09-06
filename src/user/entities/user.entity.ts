@@ -5,7 +5,7 @@ import {
   CreateDateColumn,
   OneToMany,
 } from 'typeorm';
-import { Photo } from './photo.entity';
+import { Order } from './order.entity';
 
 @Entity()
 export class User {
@@ -18,6 +18,6 @@ export class User {
   @CreateDateColumn()
   createdAt: Date;
 
-  @OneToMany(() => Photo, (photo) => photo.user)
-  photos: Photo[];
+  @OneToMany(() => Order, (order) => order.user)
+  orders: Order[];
 }
