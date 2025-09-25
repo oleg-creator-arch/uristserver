@@ -1,58 +1,41 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
-import { Photo } from './entities/photo.entity';
-import { Order } from './entities/order.entity';
+import { Repository } from 'typeorm';
+import * as bcrypt from 'bcrypt';
+import { CreateUserDto } from './dto/create-user.dto';
 
 @Injectable()
 export class UserService {
   constructor(
-    @InjectRepository(User) private userRepo: Repository<User>,
-    @InjectRepository(Order) private orderRepo: Repository<Order>,
-    @InjectRepository(Photo) private photoRepo: Repository<Photo>,
+    @InjectRepository(User)
+    private usersRepository: Repository<User>,
   ) {}
 
-  async saveFiles(
-    userId: number,
-    orderId: number,
-    files: Express.Multer.File[],
-  ) {
-    const user = await this.userRepo.findOneBy({ id: userId });
-    if (!user) {
-      throw new Error('User not found');
-    }
-
-    const order = await this.orderRepo.findOne({
-      where: { id: orderId, user: { id: userId } },
-      relations: ['user'],
-    });
-    if (!order) {
-      throw new Error('Order not found for this user');
-    }
-
-    const photos = files.map((file) => {
-      const photo = new Photo();
-      photo.filename = file.originalname;
-      photo.mimetype = file.mimetype;
-      photo.data = file.buffer;
-      photo.order = order;
-      return photo;
-    });
-
-    return this.photoRepo.save(photos);
+  async findByEmail(email: string): Promise<User | null> {
+    return this.usersRepository.findOne({ where: { email } });
   }
 
-  async getOrderPhotos(userId: number, orderId: number): Promise<Photo[]> {
-    const order = await this.orderRepo.findOne({
-      where: { id: orderId, user: { id: userId } },
-      relations: ['photos', 'user'],
+  async findById(id: number): Promise<User | null> {
+    return this.usersRepository.findOne({ where: { id } });
+  }
+
+  async save(user: User): Promise<User> {
+    return this.usersRepository.save(user);
+  }
+
+  async createUser(createUserDto: CreateUserDto): Promise<User> {
+    const existingUser = await this.findByEmail(createUserDto.email);
+    if (existingUser) {
+      throw new ConflictException('Пользователь с таким email уже существует');
+    }
+    const hash = await bcrypt.hash(createUserDto.password, 10);
+
+    const user = this.usersRepository.create({
+      ...createUserDto,
+      password: hash,
     });
 
-    if (!order) {
-      throw new Error('Order not found for this user');
-    }
-
-    return order.photos;
+    return this.usersRepository.save(user);
   }
 }

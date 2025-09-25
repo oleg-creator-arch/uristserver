@@ -1,3 +1,5 @@
+import { RefreshToken } from 'src/auth/entities/refresh-token.entity';
+import { Order } from 'src/order/entities/order.entity';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -5,7 +7,6 @@ import {
   CreateDateColumn,
   OneToMany,
 } from 'typeorm';
-import { Order } from './order.entity';
 
 @Entity()
 export class User {
@@ -13,11 +14,29 @@ export class User {
   id: number;
 
   @Column()
-  name: string;
+  lastName: string;
+
+  @Column()
+  firstName: string;
+
+  @Column({ nullable: true })
+  middleName?: string;
+
+  @Column({ unique: true })
+  phone: string;
+
+  @Column({ unique: true })
+  email: string;
+
+  @Column()
+  password: string;
 
   @CreateDateColumn()
   createdAt: Date;
 
   @OneToMany(() => Order, (order) => order.user)
   orders: Order[];
+
+  @OneToMany(() => RefreshToken, (rt) => rt.user)
+  refreshTokens: RefreshToken[];
 }

@@ -1,3 +1,4 @@
+import { Order } from 'src/order/entities/order.entity';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -5,7 +6,6 @@ import {
   ManyToOne,
   CreateDateColumn,
 } from 'typeorm';
-import { Order } from './order.entity';
 
 @Entity()
 export class Photo {
