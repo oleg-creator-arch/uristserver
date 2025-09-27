@@ -20,15 +20,32 @@ export class UserService {
     return this.usersRepository.findOne({ where: { id } });
   }
 
+  async findByPhone(phone: string): Promise<User | null> {
+    return this.usersRepository.findOne({ where: { phone } });
+  }
+
   async save(user: User): Promise<User> {
     return this.usersRepository.save(user);
   }
 
   async createUser(createUserDto: CreateUserDto): Promise<User> {
-    const existingUser = await this.findByEmail(createUserDto.email);
+    const existingUser = await this.usersRepository.findOne({
+      where: [{ email: createUserDto.email }, { phone: createUserDto.phone }],
+    });
+
     if (existingUser) {
-      throw new ConflictException('Пользователь с таким email уже существует');
+      if (existingUser.email === createUserDto.email) {
+        throw new ConflictException(
+          'Пользователь с таким email уже существует',
+        );
+      }
+      if (existingUser.phone === createUserDto.phone) {
+        throw new ConflictException(
+          'Пользователь с таким номером телефона уже существует',
+        );
+      }
     }
+
     const hash = await bcrypt.hash(createUserDto.password, 10);
 
     const user = this.usersRepository.create({

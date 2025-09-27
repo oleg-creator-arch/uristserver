@@ -125,9 +125,12 @@ export class AuthService {
 
   async requestPasswordReset(email: string) {
     const user = await this.userService.findByEmail(email);
+    console.log('user', user);
     if (!user) {
+      console.log('user3', user);
       throw new NotFoundException('Пользователь с таким email не найден');
     }
+    console.log('user2', user);
 
     const token = await this.jwtService.signAsync(
       { sub: user.id, email: user.email },
@@ -151,14 +154,26 @@ export class AuthService {
       to: email,
       subject: 'Сброс пароля',
       html: `
-        <p>Здравствуйте!</p>
-        <p>Для сброса пароля перейдите по ссылке:</p>
-        <a href="${resetLink}">Сменить пароль</a>
-        <p>Ссылка действительна 15 минут.</p>
+      <p>Здравствуйте!</p>
+      <p>Для сброса пароля перейдите по ссылке:</p>
+      <a href="${resetLink}">Сменить пароль</a>
+      <p>Ссылка действительна 15 минут.</p>
       `,
     };
-
-    await transporter.sendMail(mailOptions);
+    try {
+      await Promise.race([
+        transporter.sendMail(mailOptions),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Почта недоступна')), 5000),
+        ),
+      ]);
+    } catch (err) {
+      throw new Error(
+        err.message === 'Почта недоступна'
+          ? 'Почта недоступна или не действительна. Попробуйте позже.'
+          : 'Ошибка при отправке письма',
+      );
+    }
 
     return {
       message: 'Ссылка для сброса отправлена на email',

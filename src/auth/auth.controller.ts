@@ -22,9 +22,22 @@ export class AuthController {
   ) {}
 
   @Post('register')
-  async register(@Body() dto: CreateUserDto) {
+  async register(
+    @Body() dto: CreateUserDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
     const user = await this.userService.createUser(dto);
-    return this.authService.register(user);
+
+    const { accessToken, refreshToken } = await this.authService.register(user);
+
+    res.cookie('refresh_token', refreshToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'strict',
+      maxAge: 24 * 60 * 60 * 1000,
+    });
+
+    return { accessToken };
   }
 
   @Post('login')
