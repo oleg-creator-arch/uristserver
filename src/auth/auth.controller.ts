@@ -51,7 +51,7 @@ export class AuthController {
     );
 
     if (!user) {
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException('Почта или пароль не верны');
     }
 
     const { accessToken, refreshToken } = await this.authService.login(user);
