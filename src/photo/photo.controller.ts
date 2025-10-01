@@ -1,56 +1,63 @@
-import { Controller } from '@nestjs/common';
-// import { AnyFilesInterceptor } from '@nestjs/platform-express';
-// import { UserService } from './user.service';
-import { PaymentService } from 'src/payment/payment.service';
+import {
+  Controller,
+  Post,
+  Get,
+  Delete,
+  Param,
+  UploadedFiles,
+  UseInterceptors,
+  Res,
+  NotFoundException,
+  UseGuards,
+  Req,
+} from '@nestjs/common';
+import { AnyFilesInterceptor } from '@nestjs/platform-express';
+import { PhotoService } from './photo.service';
+import type { Response } from 'express';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
-@Controller('photo')
+@Controller('photos')
+@UseGuards(JwtAuthGuard)
 export class PhotoController {
-  constructor(
-    // private readonly userService: UserService,
-    private readonly paymentService: PaymentService,
-  ) {}
+  constructor(private readonly photoService: PhotoService) {}
 
-  // @Post(':userId/orders/:orderId/upload')
-  // @UseInterceptors(AnyFilesInterceptor())
-  // async uploadFiles(
-  //   @Param('userId') userId: number,
-  //   @Param('orderId') orderId: number,
-  //   @UploadedFiles() files: Express.Multer.File[],
-  // ) {
-  //   const photos = await this.userService.saveFiles(userId, orderId, files);
-  //   return photos.map((p) => ({
-  //     id: p.id,
-  //     filename: p.filename,
-  //     uploadedAt: p.uploadedAt,
-  //   }));
-  // }
+  @Post(':orderId/upload')
+  @UseInterceptors(AnyFilesInterceptor())
+  async uploadPhotos(
+    @Param('orderId') orderId: number,
+    @UploadedFiles() files: Express.Multer.File[],
+    @Req() req,
+  ) {
+    return this.photoService.uploadPhotos(req.user.userId, orderId, files);
+  }
 
-  // @Get(':userId/orders/:orderId/photos')
-  // async getOrderPhotos(
-  //   @Param('userId') userId: number,
-  //   @Param('orderId') orderId: number,
-  // ) {
-  //   const photos = await this.userService.getOrderPhotos(userId, orderId);
-  //   return photos.map((p) => ({
-  //     id: p.id,
-  //     filename: p.filename,
-  //     mimetype: p.mimetype,
-  //     uploadedAt: p.uploadedAt,
-  //     base64: `data:${p.mimetype};base64,${p.data.toString('base64')}`,
-  //   }));
-  // }
+  @Get(':orderId')
+  async getPhotos(@Param('orderId') orderId: number, @Req() req) {
+    return this.photoService.getPhotos(req.user.userId, orderId);
+  }
 
-  // @Post(':userId/orders/:orderId/pay')
-  // async payForOrder(
-  //   @Param('userId') userId: number,
-  //   @Param('orderId') orderId: number,
-  //   @Body() body: { amount: string; returnUrl: string },
-  // ) {
-  //   return this.paymentService.createPayment(
-  //     body.amount,
-  //     body.returnUrl,
-  //     userId,
-  //     orderId,
-  //   );
-  // }
+  @Get('file/:photoId')
+  async getPhoto(
+    @Param('photoId') photoId: number,
+    @Req() req,
+    @Res() res: Response,
+  ) {
+    const photo = await this.photoService.getPhotoById(
+      req.user.userId,
+      photoId,
+    );
+    if (!photo) throw new NotFoundException('Photo not found');
+
+    res.setHeader('Content-Type', photo.mimetype);
+    res.setHeader(
+      'Content-Disposition',
+      `inline; filename="${photo.filename}"`,
+    );
+    res.send(photo.data);
+  }
+
+  @Delete(':photoId')
+  async deletePhoto(@Param('photoId') photoId: number, @Req() req) {
+    return this.photoService.deletePhoto(req.user.userId, photoId);
+  }
 }

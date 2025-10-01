@@ -5,11 +5,15 @@ import { PaymentModule } from 'src/payment/payment.module';
 import { OrderService } from './order.service';
 import { Photo } from 'src/photo/entities/photo.entity';
 import { User } from 'src/user/entities/user.entity';
-import { OrdersController } from './order.controller';
+import { OrderController } from './order.controller';
+import { Service } from 'src/service/entities/service.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, Photo, Order]), PaymentModule],
-  controllers: [OrdersController],
+  imports: [
+    TypeOrmModule.forFeature([User, Photo, Order, Service]),
+    PaymentModule,
+  ],
+  controllers: [OrderController],
   providers: [OrderService],
 })
-export class UserModule {}
+export class OrderModule {}

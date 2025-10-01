@@ -199,4 +199,33 @@ export class AuthService {
       throw new BadRequestException('Недействительный или просроченный токен');
     }
   }
+
+  async changePassword(
+    userId: number,
+    oldPassword: string,
+    newPassword: string,
+  ) {
+    const user = await this.userService.findById(userId);
+    if (!user) {
+      throw new UnauthorizedException('Пользователь не найден');
+    }
+
+    const isMatch = await bcrypt.compare(oldPassword, user.password);
+    if (!isMatch) {
+      throw new UnauthorizedException('Старый пароль неверный');
+    }
+
+    const hash = await bcrypt.hash(newPassword, 10);
+    user.password = hash;
+    await this.userService.save(user);
+
+    await this.refreshTokenRepo.delete({ user });
+
+    const tokens = await this.generateTokens(user);
+
+    return {
+      message: 'Пароль успешно изменён',
+      ...tokens,
+    };
+  }
 }

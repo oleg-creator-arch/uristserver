@@ -22,6 +22,12 @@ export class Service {
   @Column({ type: 'numeric' })
   price: number;
 
+  @Column({ type: 'numeric', default: 0 })
+  notaryPrice: number;
+
+  @Column({ type: 'numeric', default: 0 })
+  deliveryPrice: number;
+
   @Column({ type: 'text' })
   iconSvg: string;
 

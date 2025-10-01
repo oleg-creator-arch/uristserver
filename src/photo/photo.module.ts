@@ -12,4 +12,4 @@ import { Order } from 'src/order/entities/order.entity';
   controllers: [PhotoController],
   providers: [PhotoService],
 })
-export class UserModule {}
+export class PhotoModule {}

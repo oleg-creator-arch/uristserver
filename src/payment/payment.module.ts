@@ -1,8 +1,11 @@
 import { Module } from '@nestjs/common';
 import { YooCheckout } from '@a2seven/yoo-checkout';
 import { PaymentService } from './payment.service';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { Order } from 'src/order/entities/order.entity';
 
 @Module({
+  imports: [TypeOrmModule.forFeature([Order])],
   providers: [
     PaymentService,
     {
@@ -13,7 +16,7 @@ import { PaymentService } from './payment.service';
 
         if (!shopId || !secretKey) {
           throw new Error(
-            '❌ Missing SHOPID or SECRETYOUKASSA in environment variables',
+            'Missing SHOPID or SECRETYOUKASSA in environment variables',
           );
         }
 
