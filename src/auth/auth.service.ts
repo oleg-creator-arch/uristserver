@@ -52,16 +52,13 @@ export class AuthService {
       const payload = await this.jwtService.verifyAsync(refreshToken, {
         secret: process.env.JWT_REFRESH_SECRET,
       });
-      console.log('ttt', payload);
 
       const user = await this.userService.findById(payload.sub);
       if (!user) throw new UnauthorizedException('Пользователь не найден');
-      console.log('ttt user', user);
 
       const tokens = await this.refreshTokenRepo.find({
         where: { user: { id: user.id } },
       });
-      console.log('ttt tokens', tokens);
 
       const match = await Promise.any(
         tokens.map((t) =>
@@ -71,14 +68,11 @@ export class AuthService {
         ),
       ).catch(() => null);
 
-      console.log('ttt match', match);
-
       if (!match) {
         throw new UnauthorizedException('Недействительный refresh токен');
       }
 
       await this.refreshTokenRepo.remove(match);
-      console.log('ttt match2');
 
       return this.generateTokens(user);
     } catch (e) {
@@ -125,12 +119,9 @@ export class AuthService {
 
   async requestPasswordReset(email: string) {
     const user = await this.userService.findByEmail(email);
-    console.log('user', user);
     if (!user) {
-      console.log('user3', user);
       throw new NotFoundException('Пользователь с таким email не найден');
     }
-    console.log('user2', user);
 
     const token = await this.jwtService.signAsync(
       { sub: user.id, email: user.email },

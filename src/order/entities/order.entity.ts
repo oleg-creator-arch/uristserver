@@ -86,9 +86,14 @@ export class Order {
   @BeforeInsert()
   @BeforeUpdate()
   calculateTotal() {
-    const base = (this.servicePrice ?? 0) * this.pages;
-    const notary = this.notary ? this.notaryPrice : 0;
-    const delivery = this.delivery ? this.deliveryPrice : 0;
+    const servicePrice = parseFloat(this.servicePrice as any) || 0;
+    const notaryPrice = parseFloat(this.notaryPrice as any) || 0;
+    const deliveryPrice = parseFloat(this.deliveryPrice as any) || 0;
+
+    const base = servicePrice * this.pages;
+    const notary = this.notary ? notaryPrice : 0;
+    const delivery = this.delivery ? deliveryPrice : 0;
+
     this.totalPrice = base + notary + delivery;
   }
   @BeforeInsert()

@@ -4,6 +4,10 @@ import { Order } from 'src/order/entities/order.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
+import * as fs from 'fs';
+import * as path from 'path';
+import { v4 as uuidv4 } from 'uuid';
+
 @Injectable()
 export class PaymentService {
   constructor(
@@ -19,6 +23,11 @@ export class PaymentService {
     if (!returnUrl) {
       throw new Error('PAYMENT_RETURN_URL is not set in environment');
     }
+    this.writeLog('ERROR', 'order');
+    this.writeLog('ERROR', order);
+
+    const idempotenceKey = uuidv4();
+    order.idempotenceKey = idempotenceKey;
 
     const payment = await this.yooCheckout.createPayment(
       {
@@ -27,11 +36,14 @@ export class PaymentService {
         capture: true,
         description: `Оплата заказа #${orderId} пользователя ${userId}`,
       },
-      order.idempotenceKey,
+      idempotenceKey,
     );
-
     order.paymentId = payment.id;
     await this.orderRepo.save(order);
+    this.writeLog('ERROR', 'newsorder');
+    this.writeLog('ERROR', order);
+    this.writeLog('ERROR', 'newpaymant');
+    this.writeLog('ERROR', payment);
     return payment;
   }
 

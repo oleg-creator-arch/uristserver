@@ -65,7 +65,6 @@ export class OrderController {
       orderId,
       order,
     );
-    console.log('payment', payment);
     return payment;
   }
 

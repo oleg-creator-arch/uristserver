@@ -7,7 +7,8 @@ import { Service } from 'src/service/entities/service.entity';
 import { Photo } from 'src/photo/entities/photo.entity';
 import { CreateOrderDto, DeliveryFormat } from './dto/create-order.dto';
 import { PaymentService } from 'src/payment/payment.service';
-
+import * as fs from 'fs';
+import * as path from 'path';
 @Injectable()
 export class OrderService {
   constructor(
@@ -147,13 +148,13 @@ export class OrderService {
     }
 
     for (const order of orders) {
-      const payment = await this.paymentService.getPayment(order);
+      if (order.paymentId !== '' && order.paymentId !== null) {
+        const payment = await this.paymentService.getPayment(order);
 
-      console.log('paymentGet', payment);
-
-      if (payment.paid) {
-        order.status = OrderStatus.PAID;
-        await this.orderRepo.save(order);
+        if (payment.paid) {
+          order.status = OrderStatus.PAID;
+          await this.orderRepo.save(order);
+        }
       }
     }
 
@@ -171,8 +172,6 @@ export class OrderService {
     if (!order) {
       return 0;
     }
-
-    console.log('order', order);
 
     return order.readyInDays;
   }
