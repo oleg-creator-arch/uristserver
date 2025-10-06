@@ -91,7 +91,6 @@ export class AuthController {
 
   @Post('request-reset')
   async requestReset(@Body() dto: RequestResetDto) {
-    console.log(dto);
     return this.authService.requestPasswordReset(dto.email);
   }
 

@@ -23,8 +23,6 @@ export class PaymentService {
     if (!returnUrl) {
       throw new Error('PAYMENT_RETURN_URL is not set in environment');
     }
-    this.writeLog('ERROR', 'order');
-    this.writeLog('ERROR', order);
 
     const idempotenceKey = uuidv4();
     order.idempotenceKey = idempotenceKey;
@@ -40,10 +38,6 @@ export class PaymentService {
     );
     order.paymentId = payment.id;
     await this.orderRepo.save(order);
-    this.writeLog('ERROR', 'newsorder');
-    this.writeLog('ERROR', order);
-    this.writeLog('ERROR', 'newpaymant');
-    this.writeLog('ERROR', payment);
     return payment;
   }
 
