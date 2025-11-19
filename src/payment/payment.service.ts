@@ -33,6 +33,24 @@ export class PaymentService {
         confirmation: { type: 'redirect', return_url: returnUrl },
         capture: true,
         description: `Оплата заказа #${orderId} пользователя ${userId}`,
+        receipt: {
+          customer: {
+            email: order.user.email,
+          },
+          items: [
+            {
+              description: order.service?.name || 'Услуга',
+              quantity: order.pages ? order.pages.toString() : '1.00',
+              amount: {
+                value: amount,
+                currency: 'RUB',
+              },
+              vat_code: 1,
+              payment_mode: 'full_prepayment',
+              payment_subject: 'service',
+            },
+          ],
+        },
       },
       idempotenceKey,
     );
