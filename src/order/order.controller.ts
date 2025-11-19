@@ -39,7 +39,7 @@ export class OrderController {
   async uploadFiles(
     @Req() req,
     @UploadedFiles() files: Express.Multer.File[],
-    @Body('orderId') orderId: number,
+    @Param('orderId') orderId: number,
   ) {
     return this.orderService.uploadPhotos(req.user.userId, orderId, files);
   }
