@@ -141,8 +141,14 @@ export class OrderService {
   ): Promise<Photo[]> {
     const order = await this.orderRepo.findOne({
       where: { id: orderId, user: { id: userId } },
+      relations: ['photos'],
     });
+
     if (!order) throw new NotFoundException('Order not found');
+
+    if (order.photos && order.photos.length > 0) {
+      await this.photoRepo.remove(order.photos);
+    }
 
     const photos = files.map((file) => {
       const photo = new Photo();
