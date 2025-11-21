@@ -104,8 +104,8 @@ export class PaymentService {
         <p><b>Страниц:</b> ${order.pages}</p>
         <p><b>Нотариат:</b> ${order.notary ? 'Да' : 'Нет'}</p>
         <p><b>Тип документа:</b> ${order.documentType}</p>
-        <p><b>Оргинальный язык:</b> ${getLanguageLabel(order.fromLanguage)} на ${getLanguageLabel(order.toLanguage)}</p>
-        <p><b>На какой перевести:</b> ${getLanguageLabel(order.fromLanguage)} на ${getLanguageLabel(order.toLanguage)}</p>
+        <p><b>Оргинальный язык:</b> ${getLanguageLabel(order.fromLanguage)}</p>
+        <p><b>На какой перевести:</b> ${getLanguageLabel(order.toLanguage)}</p>
         <p><b>Доставка:</b> ${order.delivery ? 'Курьер' : 'Онлайн'}</p>
         <p><b>Адрес:</b> ${order.address ?? '-'}</p>
       `;
