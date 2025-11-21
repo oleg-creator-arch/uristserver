@@ -23,65 +23,6 @@ export class OrderService {
     private readonly paymentService: PaymentService,
   ) {}
 
-  private async sendOrderEmail(order: Order) {
-    const transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
-      port: parseInt(process.env.SMTP_PORT || '465', 10),
-      secure: true,
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-      },
-    });
-
-    const translateTypes = [
-      { value: 'azerbaijani', label: 'азербайджанский' },
-      { value: 'english', label: 'английский' },
-      { value: 'armenian', label: 'армянский' },
-      { value: 'georgian', label: 'грузинский' },
-      { value: 'kazakh', label: 'казахский' },
-      { value: 'kyrgyz', label: 'кыргызский' },
-      { value: 'russian', label: 'русский' },
-      { value: 'tajik', label: 'таджикский' },
-      { value: 'turkish', label: 'турецкий' },
-      { value: 'turkmen', label: 'туркменский' },
-      { value: 'uzbek', label: 'узбекский' },
-    ] as const;
-
-    const attachments =
-      order.photos?.map((photo) => ({
-        filename: photo.filename,
-        content: photo.data,
-        contentType: photo.mimetype,
-      })) ?? [];
-
-    const getLanguageLabel = (value: string) =>
-      translateTypes.find((t) => t.value === value)?.label ?? value;
-
-    const html = `
-        <h2>Новый заказ #${order.id}</h2>
-        <p><b>Пользователь:</b> ${order.user.email}</p>
-        <p><b>Услуга:</b> ${order.service.title}</p>
-        <p><b>Страниц:</b> ${order.pages}</p>
-        <p><b>Нотариат:</b> ${order.notary ? 'Да' : 'Нет'}</p>
-        <p><b>Тип документа:</b> ${order.documentType}</p>
-        <p><b>Оргинальный язык:</b> ${getLanguageLabel(order.fromLanguage)} на ${getLanguageLabel(order.toLanguage)}</p>
-        <p><b>На какой перевести:</b> ${getLanguageLabel(order.fromLanguage)} на ${getLanguageLabel(order.toLanguage)}</p>
-        <p><b>Доставка:</b> ${order.delivery ? 'Курьер' : 'Онлайн'}</p>
-        <p><b>Адрес:</b> ${order.address ?? '-'}</p>
-      `;
-
-    const mailOptions = {
-      from: `"Order Bot" <${process.env.SMTP_USER}>`,
-      to: process.env.ORDER_EMAIL,
-      subject: `Новый заказ #${order.id}`,
-      html,
-      attachments,
-    };
-
-    await transporter.sendMail(mailOptions);
-  }
-
   async getFillingOrder(userId: number): Promise<Order> {
     const user = await this.userRepo.findOneBy({ id: userId });
     if (!user) throw new NotFoundException('User not found');
@@ -159,13 +100,7 @@ export class OrderService {
       return photo;
     });
 
-    const saved = await this.photoRepo.save(photos);
-
-    const fullOrder = await this.getOrderById(userId, orderId);
-
-    await this.sendOrderEmail(fullOrder);
-
-    return saved;
+    return await this.photoRepo.save(photos);
   }
 
   async getOrderPhotos(userId: number, orderId: number): Promise<Photo[]> {

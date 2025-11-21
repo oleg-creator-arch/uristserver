@@ -8,6 +8,7 @@ import {
   UseGuards,
   Req,
   Param,
+  HttpCode,
 } from '@nestjs/common';
 import { AnyFilesInterceptor } from '@nestjs/platform-express';
 import { OrderService } from './order.service';
@@ -79,5 +80,11 @@ export class OrderController {
   @Get('earliest-ready-date')
   async getEarliestReadyDate(@Req() req) {
     return this.orderService.getEarliestReadyDate(req.user.userId);
+  }
+
+  @Post('notification')
+  @HttpCode(200)
+  async handleWebhook(@Body() data: any) {
+    return await this.paymentService.handleWebhook(data);
   }
 }
