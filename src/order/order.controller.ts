@@ -36,7 +36,11 @@ export class OrderController {
   }
 
   @Post(':orderId/upload')
-  @UseInterceptors(AnyFilesInterceptor())
+  @UseInterceptors(
+    AnyFilesInterceptor({
+      limits: { fileSize: 100 * 1024 * 1024 },
+    }),
+  )
   async uploadFiles(
     @Req() req,
     @UploadedFiles() files: Express.Multer.File[],

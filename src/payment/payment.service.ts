@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { YooCheckout } from '@a2seven/yoo-checkout';
 import { Order, OrderStatus } from 'src/order/entities/order.entity';
 import { Repository } from 'typeorm';

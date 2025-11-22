@@ -22,7 +22,11 @@ export class PhotoController {
   constructor(private readonly photoService: PhotoService) {}
 
   @Post(':orderId/upload')
-  @UseInterceptors(AnyFilesInterceptor())
+  @UseInterceptors(
+    AnyFilesInterceptor({
+      limits: { fileSize: 100 * 1024 * 1024 },
+    }),
+  )
   async uploadPhotos(
     @Param('orderId') orderId: number,
     @UploadedFiles() files: Express.Multer.File[],
